@@ -23,17 +23,17 @@ installed in /usr/local/openssl (with openssl.pc in
 /usr/local/openssl/lib/pkgconfig/) and lasso is installed in /opt/lasso
 (lasso.pc in /opt/lasso/lib/pkgconfig/), then you can set PKG_CONFIG_PATH
 before running configure like this:
-```
-PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:/opt/lasso/lib/pkgconfig
-export PKG_CONFIG_PATH
-```
+
+    PKG_CONFIG_PATH=/usr/local/openssl/lib/pkgconfig:/opt/lasso/lib/pkgconfig
+    export PKG_CONFIG_PATH
+
 If Apache is installed in a "strange" directory, then you may have to
 specify the path to apxs2 using the `--with-apxs2=/full/path/to/apxs2`
 option to configure. If, for example, Apache is installed in /opt/apache,
 with apxs2 in /opt/apache/bin, then you run
-```
-./configure --with-apxs2=/opt/apache2/bin/apxs2
-```
+
+    ./configure --with-apxs2=/opt/apache2/bin/apxs2
+
 Note that, depending on your distribution, apxs2 may be named apxs.
 
 
@@ -41,11 +41,10 @@ Note that, depending on your distribution, apxs2 may be named apxs.
 
 mod_auth_mellon uses autoconf, and can be installed by running the
 following commands:
-```
-./configure
-make
-make install
-```
+
+    ./configure
+    make
+    make install
 
 
 ## Configuring mod_auth_mellon
@@ -61,13 +60,13 @@ different.
 
 You need to add a LoadModule directive for mod_auth_mellon. This will
 look similar to this:
-```
-LoadModule auth_mellon_module /usr/lib/apache2/modules/mod_auth_mellon.so
-```
+
+    LoadModule auth_mellon_module /usr/lib/apache2/modules/mod_auth_mellon.so
+
 To find the full path to mod_auth_mellon.so, you may run:
-```
-apxs2 -q LIBEXECDIR
-```
+
+    apxs2 -q LIBEXECDIR
+
 This will print the path where Apache stores modules. mod_auth_mellon.so
 will be stored in that directory.
 
@@ -665,9 +664,9 @@ NOTE:
 
 If MellonMergeEnvVars is set to On, multiple values of attributes 
 will be stored in single environment variable, separated by semicolons:
-```
-MELLON_<name>="value1;value2;value3[;valueX]"
-```
+
+    MELLON_<name>="value1;value2;value3[;valueX]"
+
 and variables `MELLON_<name>_0`, `MELLON_<name>_1`, `MELLON_<name>_2`, ...
 will not be created.
 
@@ -729,12 +728,12 @@ mod_auth_mellon has an IdP probe discovery service that sends HTTP GET
 to IdP and picks the first that answers. This can be used as a poor
 man's failover setup that redirects to your organisation internal IdP. 
 Here is a sample configuration:
-```
-MellonEndpointPath "/saml"
-(...)
-MellonDiscoveryUrl "/saml/probeDisco"
-MellonProbeDiscoveryTimeout 1
-```
+
+    MellonEndpointPath "/saml"
+    (...)
+    MellonDiscoveryUrl "/saml/probeDisco"
+    MellonProbeDiscoveryTimeout 1
+
 The SP will send an HTTP GET to each configured IdP entityId URL until
 it gets an HTTP 200 response within the 1 second timeout. It will then 
 proceed with that IdP.
@@ -766,26 +765,26 @@ enable this:
 
 1. Create a data directory where mod_auth_mellon can store the saved data:
 
-        mkdir /var/cache/mod_auth_mellon_postdata
+       mkdir /var/cache/mod_auth_mellon_postdata
 
 2. Set the appropriate permissions on this directory. It needs to be
    accessible for the web server, but nobody else.
 
-        chown www-data /var/cache/mod_auth_mellon_postdata
-        chgrp www-data /var/cache/mod_auth_mellon_postdata
-        chmod 0700 /var/cache/mod_auth_mellon_postdata
+       chown www-data /var/cache/mod_auth_mellon_postdata
+       chgrp www-data /var/cache/mod_auth_mellon_postdata
+       chmod 0700 /var/cache/mod_auth_mellon_postdata
 
 3. Set the MellonPostDirectory option in your server configuration:
 
-        MellonPostDirectory "/var/cache/mod_auth_mellon_postdata"
+       MellonPostDirectory "/var/cache/mod_auth_mellon_postdata"
 
 4. Enable POST replay functionality for the locations you want:
 
-        <Location /secret>
-            MellonEnable auth
-            [...]
-            MellonPostReplay On
-        </Location>
+       <Location /secret>
+           MellonEnable auth
+           [...]
+           MellonPostReplay On
+       </Location>
 
 After you restart Apache to activate the new configuration, any POST
 requests that trigger authentication should now be stored while the
@@ -798,30 +797,27 @@ The below snippet will allow for preemptive basic auth (such as from a REST clie
 for the "/auth" path, but if accessed interactively will trigger SAML auth with
 mod_auth_mellon. 
 
-```
-<Location />
-  MellonEnable "info"
-  MellonVariable "cookie"
-  MellonEndpointPath "/sso"
-  Mellon... # Other parameters as needed
-</Location>
-
-<Location /auth>
-  <If "-n req('Authorization')">
-    AuthName "My Auth"
-    AuthBasicProvider ldap
-    AuthType basic
-    AuthLDAP* # Other basic auth config parms as needed
-
-    require ldap-group ....
-  </If>
-  <Else>
-    Require valid-user
-    AuthType "Mellon"
-    MellonEnable "auth"
-  </Else>
-</Location>
-```
+    <Location />
+      MellonEnable "info"
+      MellonVariable "cookie"
+      MellonEndpointPath "/sso"
+      Mellon... # Other parameters as needed
+    </Location>
+    
+    <Location /auth>
+      <If "-n req('Authorization')">
+        AuthName "My Auth"
+        AuthBasicProvider ldap
+        AuthType basic
+        AuthLDAP* # Other basic auth config parms as needed
+        require ldap-group ....
+      </If>
+      <Else>
+        Require valid-user
+        AuthType "Mellon"
+        MellonEnable "auth"
+      </Else>
+    </Location>
 
 
 ## Mellon & User Agent Caching behavior
